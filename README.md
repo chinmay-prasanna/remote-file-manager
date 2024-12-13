@@ -26,6 +26,7 @@ You will need the ip address of the remote server.
 ### Client Setup
 Clone the repository, add an env file in client folder containing -
 > endpoint=http://<remote_ip>/list/
+> 
 > localServerEndpoint=http://localhost:8000/transfer/
 
 Add env file in repo root containing -
