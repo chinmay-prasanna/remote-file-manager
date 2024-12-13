@@ -2,7 +2,7 @@
 
 source venv/bin/activate
 
-nohup python client-server.py &
+nohup flask run --prot 8000 &
 
 cd client
 

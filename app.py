@@ -57,7 +57,29 @@ def edit_file():
         ssh.close()
         return jsonify({"status": "success"}), 200
     except Exception as e:
+        print(str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
   
+@app.route("/delete", methods=['POST'])
+def delete_file():    
+    data = request.json
+    ssh_host = os.environ['SSH_HOST']
+    ssh_user = os.environ['SSH_USER']
+    ssh_pass = os.environ['SSH_PASS']
+    
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ssh_host, username=ssh_user, password=ssh_pass, port=8022, allow_agent=False, look_for_keys=False)
+
+        sftp = ssh.open_sftp()
+        sftp.remove(data['file'])
+        
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        print(str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

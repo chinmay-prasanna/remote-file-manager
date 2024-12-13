@@ -20,12 +20,37 @@ app.whenReady().then(() => {
             filePath: data.path,
             targetDir: data.dir,
         }
-        event.reply("debug-log", `Received Data: ${JSON.stringify(data)}`)
         try {
-            const response = await axios.post(env.localServerEndpoint, requestData);
+            const response = await axios.post(env.localServerEndpoint + "transfer", requestData);
             event.reply("transfer-success", response.data);
         } catch (error) {
             event.reply("transfer-error", error.message);
+        }
+    });
+
+    ipcMain.on("edit-file", async (event, data) => {
+        event.reply("debug-log", `Received Data: ${JSON.stringify(data)}`)
+        const requestData = {
+            name: data.name,
+            file: data.path,
+        }
+        try {
+            const response = await axios.post(env.localServerEndpoint + "edit", requestData);
+            event.reply("transfer-success", response.data);
+        } catch (error) {
+            event.reply("transfer-error", error.message);
+        }
+    });
+
+    ipcMain.on("delete-file", async (event, data) => {
+        const requestData = {
+            file: data.file
+        }
+        try {
+            const response = axios.post(env.localServerEndpoint + "delete", requestData);
+            event.reply("delete-success", response.data);
+        } catch (error) {
+            event.reply("delete-error", error.message)
         }
     });
 });
