@@ -1,3 +1,7 @@
+svg {
+    display: block;
+}
+
 body.dark-mode {
     background-color: #121212;
     color: #ffffff;
@@ -14,6 +18,9 @@ h1 {
 
 .card-body {
     color: #cfcfcf;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .card-body a {
@@ -41,4 +48,59 @@ h1 {
     background-color: #333;
     color: #ff6b6b;
     border-color: #ff6b6b;
+}
+
+#item-name {
+    margin-left: 10px;
+}
+
+#edit-file {
+    margin-left: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+#delete-file {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+#edit-file svg:hover {
+    stroke: #575555;
+    transition: stroke 0.2s ease;
+}
+
+#delete-file svg:hover {
+    stroke: #575555;
+    transition: stroke 0.2s ease;
+}
+
+#edit-box {
+    position: relative;
+    display: none;
+}
+
+#edit-box input {
+    padding: 5px;
+    margin-right: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+#edit-box button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#edit-box button:hover {
+    background: #0056b3;
 }
