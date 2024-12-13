@@ -27,7 +27,7 @@ You will need the ip address of the remote server.
 Clone the repository, add an env file in client folder containing -
 > endpoint=http://<remote_ip>/list/
 > 
-> localServerEndpoint=http://localhost:8000/transfer/
+> localServerEndpoint=http://localhost:8000/
 
 Add env file in repo root containing -
 > SSH_HOST = <remote_ip>
