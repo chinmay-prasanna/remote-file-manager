@@ -7,11 +7,11 @@ The remote server must have ssh installed, right now only password authenticatio
 ### Remote Server setup
 Install ssh daemon 
 
-```sudo apt install```
+```sudo apt install openssh```
 
 Run ssh daemon
 
-```ssh```
+```sshd```
 
 Setup Password
 
