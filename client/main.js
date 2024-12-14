@@ -21,8 +21,9 @@ app.whenReady().then(() => {
             targetDir: data.dir,
         }
         try {
-            const response = await axios.post(env.localServerEndpoint + "transfer", requestData);
-            event.reply("transfer-success", response.data);
+            const response = await axios.post(env.localServerEndpoint + "transfer", requestData).then(response => {
+                event.reply("transfer-success", response.data);
+            });
         } catch (error) {
             event.reply("transfer-error", error.message);
         }
@@ -35,10 +36,11 @@ app.whenReady().then(() => {
             file: data.path,
         }
         try {
-            const response = await axios.post(env.localServerEndpoint + "edit", requestData);
-            event.reply("transfer-success", response.data);
+            const response = await axios.post(env.localServerEndpoint + "edit", requestData).then(response => {
+                event.reply("edit-success", response.data);
+            });
         } catch (error) {
-            event.reply("transfer-error", error.message);
+            event.reply("edit-error", error.message);
         }
     });
 
@@ -47,10 +49,25 @@ app.whenReady().then(() => {
             file: data.file
         }
         try {
-            const response = axios.post(env.localServerEndpoint + "delete", requestData);
-            event.reply("delete-success", response.data);
+            const response = axios.post(env.localServerEndpoint + "delete", requestData).then(response => {
+                event.reply("delete-success", response.data);
+            });
         } catch (error) {
             event.reply("delete-error", error.message)
+        }
+    });
+
+    ipcMain.on("create-file", async (event, data) => {
+        const requestData = {
+            name: data.name,
+            path: data.path
+        }
+        try {
+            const response = axios.post(env.localServerEndpoint + "create", requestData).then(response => {
+                event.reply("create-success", response.data);
+            });
+        } catch (error) {
+            event.reply("create-error", error.message)
         }
     });
 });

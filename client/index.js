@@ -32,9 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const path = webUtils.getPathForFile(file)
             if (path){
                 ipcRenderer.send("transfer-files", { path, dir });
-                location.reload()
                 ipcRenderer.on("debug-log", (event, message) => {
                     console.log(message)
+                })
+                ipcRenderer.on("transfer-success", () => {
+                    location.reload()
                 })
             }
         }
@@ -65,11 +67,9 @@ function editFileClicked(event) {
                 ipcRenderer.on("debug-log", (event, message) => {
                     console.log("message")
                 })
-
-                const updatedSpan = document.createElement('span');
-                updatedSpan.id = 'item-name';
-                updatedSpan.innerHTML = name;
-                inputBox.replaceWith(updatedSpan);
+                ipcRenderer.on("edit-success", () => {
+                    location.reload()
+                })
                 
                 window.reload()
             }
@@ -88,8 +88,9 @@ function deleteFile (event) {
     const index = deleteIcon.getAttribute("index")
     const file = JSON.parse(localStorage.getItem("directories"))[index].path
     ipcRenderer.send("delete-file", { file })
-
-    location.reload()
+    ipcRenderer.on("delete-success", () => {
+        location.reload()
+    })
 }
 
 function fetchDirectory(dir) {
@@ -182,4 +183,116 @@ function updateBackButton() {
     }
 }
 
+function closeTab(e) {
+    const closeButton = e.currentTarget
+    const cardBody = closeButton.closest('.col-md-3')
+    console.log(cardBody)
+    const row = document.querySelector(".row")
+    row.removeChild(cardBody)
+}
+
+function createFile(e) {
+    console.log("here")
+    if (e.key === 'Enter') {
+        const name = e.currentTarget.value.trim();
+        console.log(e.currentTarget, e.currentTarget.value)
+        if (name) {
+            const target = document.querySelector("#directory-list");
+            const curDir = target.getAttribute("data-dir")
+            ipcRenderer.send("create-file", { name, path: curDir });
+            ipcRenderer.on("debug-log", (event, message) => {
+                console.log("message")
+            })
+            ipcRenderer.on("create-success", () => {
+                location.reload()
+            })
+        }
+    }
+}
+
 fetchDirectory("/sdcard");
+
+const container = document.querySelector('.container');
+const contextMenu = document.getElementById('context-menu');
+let clipboard = null;
+
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    const target = e.target;
+    const isItem = target.classList.contains('item');
+    const copyOption = document.getElementById('copy');
+    const pasteOption = document.getElementById('paste');
+
+    if (isItem) {
+        copyOption.classList.remove('hidden');
+    } else {
+        copyOption.classList.add('hidden');
+    }
+
+    if (clipboard) {
+        pasteOption.classList.remove('hidden');
+    } else {
+        pasteOption.classList.add('hidden');
+    }
+
+    contextMenu.style.top = `${e.pageY}px`;
+    contextMenu.style.left = `${e.pageX}px`;
+    contextMenu.style.display = 'block';
+    contextMenu.dataset.target = isItem ? target.textContent : '';
+});
+
+document.addEventListener('click', () => {
+    contextMenu.style.display = 'none';
+});
+
+document.getElementById('new-file').addEventListener('click', (e) => {
+    const listDiv = document.querySelector(".row")
+    const colDiv = document.createElement('div');
+    colDiv.classList.add("col-md-3" ,"mb-3")
+
+    const cardDiv = document.createElement('div')
+    cardDiv.classList.add("card")
+
+    const cardItemDiv = document.createElement("div")
+    cardItemDiv.classList.add("card-body", "item")
+    
+    cardItemDiv.innerHTML = `
+        <span id="item-name-input">
+            <input type="text" class="form-control" onkeydown="createFile(event)"></input>
+        </span>
+        <span id="delete-file" onclick="closeTab(event)"}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </span>
+    `
+
+    cardDiv.appendChild(cardItemDiv)
+    colDiv.appendChild(cardDiv)
+    listDiv.appendChild(colDiv)
+});
+
+document.getElementById('new-directory').addEventListener('click', () => {
+    const newDirectory = document.createElement('div');
+    newDirectory.classList.add('item');
+    newDirectory.dataset.type = 'directory';
+    newDirectory.textContent = 'New Directory';
+    container.appendChild(newDirectory);
+});
+
+document.getElementById('copy').addEventListener('click', () => {
+    const target = contextMenu.dataset.target;
+    clipboard = target;
+});
+
+document.getElementById('paste').addEventListener('click', () => {
+    if (clipboard) {
+        const newItem = document.createElement('div');
+        newItem.classList.add('item');
+        newItem.textContent = clipboard;
+        newItem.dataset.type = clipboard.includes('File') ? 'file' : 'directory';
+        container.appendChild(newItem);
+        clipboard = null;
+    }
+});
