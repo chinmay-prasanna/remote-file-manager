@@ -73,7 +73,10 @@ def delete_file():
         ssh.connect(ssh_host, username=ssh_user, password=ssh_pass, port=8022, allow_agent=False, look_for_keys=False)
 
         sftp = ssh.open_sftp()
-        sftp.remove(data['file'])
+        if data['type'] == "directory":
+            sftp.rmdir(data['file'])
+        elif data['type'] == "file":
+            sftp.remove(data['file'])
 
         sftp.close()
         ssh.close()
@@ -91,18 +94,22 @@ def create_file():
     ssh_pass = os.environ['SSH_PASS']
     
     try:
+        print(data)
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ssh_host, username=ssh_user, password=ssh_pass, port=8022, allow_agent=False, look_for_keys=False)
 
         sftp = ssh.open_sftp()
-        temp_file = open(data['name'], 'w')
-        sftp.put(os.path.abspath(data['name']), os.path.join(data['path'], data['name']))
 
+        if data['type'] == "file":
+            temp_file = open(data['name'], 'w')
+            sftp.put(os.path.abspath(data['name']), os.path.join(data['path'], data['name']))
+            os.remove(data['name'])
+        elif data['type'] == 'dir':
+            sftp.mkdir(os.path.join(data['path'], data['name']))
         sftp.close()
         ssh.close()
 
-        os.remove(data['name'])
         return jsonify({"status": "success"}), 200
 
     except Exception as e:

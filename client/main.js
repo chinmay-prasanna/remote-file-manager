@@ -4,6 +4,7 @@ const axios = require("axios");
 const path = require("path");
 
 const env = envy()
+
 app.whenReady().then(() => {
     const mainWindow = new BrowserWindow({
         webPreferences: {
@@ -22,7 +23,7 @@ app.whenReady().then(() => {
         }
         try {
             const response = await axios.post(env.localServerEndpoint + "transfer", requestData).then(response => {
-                event.reply("transfer-success", response.data);
+                event.reply("transfer-success", response.data);   
             });
         } catch (error) {
             event.reply("transfer-error", error.message);
@@ -37,7 +38,7 @@ app.whenReady().then(() => {
         }
         try {
             const response = await axios.post(env.localServerEndpoint + "edit", requestData).then(response => {
-                event.reply("edit-success", response.data);
+                event.reply("edit-success", response.data); 
             });
         } catch (error) {
             event.reply("edit-error", error.message);
@@ -46,7 +47,8 @@ app.whenReady().then(() => {
 
     ipcMain.on("delete-file", async (event, data) => {
         const requestData = {
-            file: data.file
+            file: data.file,
+            type: data.type
         }
         try {
             const response = axios.post(env.localServerEndpoint + "delete", requestData).then(response => {
@@ -60,7 +62,8 @@ app.whenReady().then(() => {
     ipcMain.on("create-file", async (event, data) => {
         const requestData = {
             name: data.name,
-            path: data.path
+            path: data.path,
+            type: data.type
         }
         try {
             const response = axios.post(env.localServerEndpoint + "create", requestData).then(response => {

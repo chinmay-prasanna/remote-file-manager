@@ -86,8 +86,9 @@ function editFileClicked(event) {
 function deleteFile (event) {
     const deleteIcon = event.currentTarget
     const index = deleteIcon.getAttribute("index")
-    const file = JSON.parse(localStorage.getItem("directories"))[index].path
-    ipcRenderer.send("delete-file", { file })
+    const item = JSON.parse(localStorage.getItem("directories"))[index]
+    const file = item.path
+    ipcRenderer.send("delete-file", { file, type: item.type })
     ipcRenderer.on("delete-success", () => {
         location.reload()
     })
@@ -106,7 +107,7 @@ function fetchDirectory(dir) {
             renderDirectory(data, dir);
             updateBackButton();
             const transformed = data.reduce((acc, item) => {
-                acc[item.id] = { name: item.name, path: item.path };
+                acc[item.id] = { name: item.name, path: item.path, type: item.type };
                 return acc;
             }, {});
             localStorage.setItem('directories', JSON.stringify(transformed))
@@ -199,7 +200,7 @@ function createFile(e) {
         if (name) {
             const target = document.querySelector("#directory-list");
             const curDir = target.getAttribute("data-dir")
-            ipcRenderer.send("create-file", { name, path: curDir });
+            ipcRenderer.send("create-file", { name, path: curDir, type: "file" });
             ipcRenderer.on("debug-log", (event, message) => {
                 console.log("message")
             })
@@ -209,6 +210,26 @@ function createFile(e) {
         }
     }
 }
+
+
+function createDirectory(e) {
+    console.log("here")
+    if (e.key === 'Enter') {
+        const name = e.currentTarget.value.trim();
+        if (name) {
+            const target = document.querySelector("#directory-list");
+            const curDir = target.getAttribute("data-dir")
+            ipcRenderer.send("create-file", { name, path: curDir, type: "dir" });
+            ipcRenderer.on("debug-log", (event, message) => {
+                console.log("message")
+            })
+            ipcRenderer.on("create-success", () => {
+                location.reload()
+            })
+        }
+    }
+}
+
 
 fetchDirectory("/sdcard");
 
@@ -274,11 +295,31 @@ document.getElementById('new-file').addEventListener('click', (e) => {
 });
 
 document.getElementById('new-directory').addEventListener('click', () => {
-    const newDirectory = document.createElement('div');
-    newDirectory.classList.add('item');
-    newDirectory.dataset.type = 'directory';
-    newDirectory.textContent = 'New Directory';
-    container.appendChild(newDirectory);
+    const listDiv = document.querySelector(".row")
+    const colDiv = document.createElement('div');
+    colDiv.classList.add("col-md-3" ,"mb-3")
+
+    const cardDiv = document.createElement('div')
+    cardDiv.classList.add("card")
+
+    const cardItemDiv = document.createElement("div")
+    cardItemDiv.classList.add("card-body", "item")
+    
+    cardItemDiv.innerHTML = `
+        <span id="item-name-input">
+            <input type="text" class="form-control" onkeydown="createDirectory(event)"></input>
+        </span>
+        <span id="delete-file" onclick="closeTab(event)"}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </span>
+    `
+
+    cardDiv.appendChild(cardItemDiv)
+    colDiv.appendChild(cardDiv)
+    listDiv.appendChild(colDiv)
 });
 
 document.getElementById('copy').addEventListener('click', () => {
