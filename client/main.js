@@ -88,4 +88,17 @@ app.whenReady().then(() => {
             event.reply("paste-error", error.message)
         }
     })
+
+    ipcMain.on("download-file", async(event, data) => {
+        const requestData = {
+            file: data.file
+        }
+        try {
+            const response = axios.post(env.localServerEndpoint + "download", requestData).then(response => {
+                event.reply("download-success", response.data)
+            })
+        } catch (error) {
+            event.reply("download-error", error.message)
+        }
+    })
 });

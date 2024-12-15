@@ -94,6 +94,17 @@ function deleteFile (event) {
     })
 }
 
+function downloadFileClicked(event) {
+    const downloadIcon = event.currentTarget
+    const index = downloadIcon.getAttribute("index")
+    const item = JSON.parse(localStorage.getItem("directories"))[index]
+    const file = item.path
+    ipcRenderer.send("download-file", { file })
+    ipcRenderer.on("download-success", (message) => {
+        console.log("done")
+    })
+
+}
 function fetchDirectory(dir) {
     fetch(apiEndpoint, {
         method: "POST",
@@ -144,6 +155,11 @@ function renderDirectory(data, currentDir) {
                                 <span id="edit-file" onclick="editFileClicked(event)" index=${index}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                                    </svg>
+                                </span>
+                                <span id="download-file" onclick="downloadFileClicked(event)" index=${index}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                      <path d="M12 16.5l5-5h-3V3h-4v8.5H7l5 5ZM5 20h14v-2H5v2Z"/>
                                     </svg>
                                 </span>
                                 <span id="delete-file" onclick="deleteFile(event)" index=${index}>

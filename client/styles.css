@@ -61,6 +61,13 @@ h1 {
     align-items: center;
 }
 
+#download-file {
+    margin-left: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
 #delete-file {
     position: absolute;
     top: 8px;
@@ -77,6 +84,11 @@ h1 {
 }
 
 #delete-file svg:hover {
+    stroke: #575555;
+    transition: stroke 0.2s ease;
+}
+
+#download-file svg:hover {
     stroke: #575555;
     transition: stroke 0.2s ease;
 }
