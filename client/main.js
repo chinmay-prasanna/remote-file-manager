@@ -73,4 +73,19 @@ app.whenReady().then(() => {
             event.reply("create-error", error.message)
         }
     });
+
+    ipcMain.on("copy-paste", async (event, data) => {
+        const requestData = {
+            old_path: data.data.item,
+            new_path: data.data.newPath,
+            type: data.data.type
+        }
+        try {
+            const response = axios.post(env.localServerEndpoint + "copy-move", requestData).then(response => {
+                event.reply("paste-success", response.data);
+            });
+        } catch (error) {
+            event.reply("paste-error", error.message)
+        }
+    })
 });

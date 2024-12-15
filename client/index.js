@@ -128,7 +128,7 @@ function renderDirectory(data, currentDir) {
                 ${data.map((item, index) => (`
                     <div class="col-md-3 mb-3">
                         <div class="card">
-                            <div class="card-body item">
+                            <div class="card-body item" index=${index}>
                                 ${
                                     item.type === "directory"
                                         ? `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M4 4a2 2 0 0 1 2-2h3.5a2 2 0 0 1 1.6.8L12 4h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4z"/></svg>`
@@ -242,12 +242,29 @@ document.addEventListener('contextmenu', (e) => {
     const target = e.target;
     const isItem = target.classList.contains('item');
     const copyOption = document.getElementById('copy');
+    const moveOption = document.getElementById('move');
     const pasteOption = document.getElementById('paste');
+    const newFileOption = document.getElementById('new-file');
+    const newDirOption = document.getElementById('new-directory');
 
     if (isItem) {
         copyOption.classList.remove('hidden');
+        moveOption.classList.remove('hidden');
+        newFileOption.classList.add('hidden');
+        newDirOption.classList.add('hidden');
+
+        const copyItem = e.target.closest(".item")
+        const fileItem = JSON.parse(localStorage.getItem("directories"))[copyItem.getAttribute("index")]
+
+        copyOption.setAttribute("copied_item", fileItem.path)
+        moveOption.setAttribute("copied_item", fileItem.path)
+
+
     } else {
         copyOption.classList.add('hidden');
+        moveOption.classList.add('hidden');
+        newFileOption.classList.remove('hidden');
+        newDirOption.classList.remove('hidden');
     }
 
     if (clipboard) {
@@ -322,18 +339,31 @@ document.getElementById('new-directory').addEventListener('click', () => {
     listDiv.appendChild(colDiv)
 });
 
-document.getElementById('copy').addEventListener('click', () => {
-    const target = contextMenu.dataset.target;
-    clipboard = target;
+document.getElementById('copy').addEventListener('click', (e) => {
+    const copyItem = e.target.getAttribute("copied_item")
+    clipboard = {
+        item: copyItem,
+        type: "copy"
+    };
 });
+
+document.getElementById('move').addEventListener('click', (e) => {
+    const copyItem = e.target.getAttribute("copied_item")
+    clipboard = {
+        item: copyItem,
+        type: "move"
+    };
+})
 
 document.getElementById('paste').addEventListener('click', () => {
     if (clipboard) {
-        const newItem = document.createElement('div');
-        newItem.classList.add('item');
-        newItem.textContent = clipboard;
-        newItem.dataset.type = clipboard.includes('File') ? 'file' : 'directory';
-        container.appendChild(newItem);
+        const target = document.querySelector("#directory-list");
+        const curDir = target.getAttribute("data-dir")
+        clipboard.newPath = curDir
+        ipcRenderer.send("copy-paste", { data: clipboard })
+        ipcRenderer.on("paste-success", (message) => {
+            location.reload()
+        })
         clipboard = null;
     }
 });
